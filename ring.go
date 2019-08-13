@@ -64,7 +64,7 @@ func (r *Ring) Put(value int) (full bool) {
 		case re.pidx&r.mask == re.gidx&r.mask && re.pidx>>r.shift != re.gidx>>r.shift:
 			full = true
 			runtime.Gosched()
-			r.PutsFull++
+			//r.PutsFull++
 			return
 		case re.pidx&r.mask == re.gidx&r.mask && re.pidx>>r.shift == re.gidx>>r.shift:
 			fallthrough // empty
@@ -82,7 +82,7 @@ func (r *Ring) Put(value int) (full bool) {
 			}
 			//atomic.AddInt64(&r.SwapsFailed, 1)
 		}
-		r.PutSpins++
+		//r.PutSpins++
 	}
 }
 
@@ -99,7 +99,7 @@ func (r *Ring) Get() (value int, empty bool) {
 		case re.pidx&r.mask == re.gidx&r.mask && re.pidx>>r.shift == re.gidx>>r.shift:
 			empty = true
 			runtime.Gosched()
-			r.GetsEmpty++
+			//r.GetsEmpty++
 			return
 		case re.pidx&r.mask == re.gidx&r.mask && re.pidx>>r.shift != re.gidx>>r.shift:
 			fallthrough // full
@@ -118,6 +118,6 @@ func (r *Ring) Get() (value int, empty bool) {
 			}
 			//atomic.AddInt64(&r.SwapsFailed, 1)
 		}
-		r.GetSpins++
+		//r.GetSpins++
 	}
 }
