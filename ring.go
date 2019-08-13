@@ -14,14 +14,14 @@ import (
 	"unsafe"
 )
 
-// State hold the
+// Must be 64 bits in size
 type State struct {
-	pidx uint16
-	gidx uint16
-	pad  int32
+	pidx uint16 // put index
+	gidx uint16 // get index
+	pad  int32  // could change the above to 32 bit
 }
 
-// Stats only valid with one producer and consumer
+// Stats unused because of performance
 type Stats struct {
 	Puts           int64
 	Gets           int64
@@ -39,6 +39,7 @@ type Config struct {
 	size  uint8
 }
 
+// Ring implements a ring buffer that stores ints.
 type Ring struct {
 	State
 	Config
@@ -46,12 +47,15 @@ type Ring struct {
 	Values []int
 }
 
+// New creates a new ring buffer with 2^size entries.
 func New(size int) (r *Ring) {
 	r = &Ring{Config: Config{mask: uint16(1<<uint(size)) - 1, shift: uint8(size), size: uint8(size + 1)}}
 	r.Values = make([]int, 1<<uint(size))
 	return
 }
 
+// Put adds a value to the ring buffer. Returns full if there is no space.
+// Perhaps Put should overwrite instead of returning full.
 func (r *Ring) Put(value int) (full bool) {
 	var ui uint64
 	var re, ore State
@@ -86,7 +90,7 @@ func (r *Ring) Put(value int) (full bool) {
 	}
 }
 
-// Get returns an index
+// Get a value from the ring buffer. Returns empty if there are no values left.
 func (r *Ring) Get() (value int, empty bool) {
 	var ui uint64
 	var re, ore State
